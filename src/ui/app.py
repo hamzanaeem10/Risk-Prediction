@@ -2,6 +2,7 @@
 Financial Risk Prediction - Streamlit Frontend
 A modern, sleek UI for predicting loan risk
 """
+
 import streamlit as st
 import requests
 import plotly.graph_objects as go
@@ -12,11 +13,12 @@ st.set_page_config(
     page_title="Financial Risk Predictor",
     page_icon="💰",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 # Custom CSS for modern styling
-st.markdown("""
+st.markdown(
+    """
 <style>
     .main {
         background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -63,10 +65,13 @@ st.markdown("""
     .medium-risk { color: #ffa500; }
     .high-risk { color: #ff4757; }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # API Configuration
 API_URL = os.environ.get("API_URL", "http://localhost:8000")
+
 
 def check_api_health():
     """Check if API is running."""
@@ -75,6 +80,7 @@ def check_api_health():
         return response.status_code == 200
     except Exception:
         return False
+
 
 def predict_risk(data):
     """Call prediction API."""
@@ -87,67 +93,74 @@ def predict_risk(data):
     except Exception as e:
         return {"error": str(e)}
 
+
 def create_gauge_chart(probability, risk_class):
     """Create a gauge chart for risk visualization."""
     colors = {"Low": "#00ff88", "Medium": "#ffa500", "High": "#ff4757"}
     color = colors.get(risk_class, "#00d9ff")
-    
-    fig = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=probability * 100,
-        domain={'x': [0, 1], 'y': [0, 1]},
-        title={'text': f"Risk Level: {risk_class}", 'font': {'size': 24, 'color': 'white'}},
-        number={'suffix': "%", 'font': {'size': 40, 'color': color}},
-        gauge={
-            'axis': {'range': [0, 100], 'tickcolor': 'white'},
-            'bar': {'color': color},
-            'bgcolor': 'rgba(255,255,255,0.1)',
-            'borderwidth': 0,
-            'steps': [
-                {'range': [0, 33], 'color': 'rgba(0,255,136,0.2)'},
-                {'range': [33, 66], 'color': 'rgba(255,165,0,0.2)'},
-                {'range': [66, 100], 'color': 'rgba(255,71,87,0.2)'}
-            ],
-            'threshold': {
-                'line': {'color': color, 'width': 4},
-                'thickness': 0.75,
-                'value': probability * 100
-            }
-        }
-    ))
-    
+
+    fig = go.Figure(
+        go.Indicator(
+            mode="gauge+number",
+            value=probability * 100,
+            domain={"x": [0, 1], "y": [0, 1]},
+            title={"text": f"Risk Level: {risk_class}", "font": {"size": 24, "color": "white"}},
+            number={"suffix": "%", "font": {"size": 40, "color": color}},
+            gauge={
+                "axis": {"range": [0, 100], "tickcolor": "white"},
+                "bar": {"color": color},
+                "bgcolor": "rgba(255,255,255,0.1)",
+                "borderwidth": 0,
+                "steps": [
+                    {"range": [0, 33], "color": "rgba(0,255,136,0.2)"},
+                    {"range": [33, 66], "color": "rgba(255,165,0,0.2)"},
+                    {"range": [66, 100], "color": "rgba(255,71,87,0.2)"},
+                ],
+                "threshold": {
+                    "line": {"color": color, "width": 4},
+                    "thickness": 0.75,
+                    "value": probability * 100,
+                },
+            },
+        )
+    )
+
     fig.update_layout(
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font={'color': 'white'},
-        height=300
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font={"color": "white"},
+        height=300,
     )
     return fig
+
 
 def create_probability_chart(probabilities):
     """Create bar chart for class probabilities."""
     classes = list(probabilities.keys())
     values = [v * 100 for v in probabilities.values()]
-    colors = ['#00ff88', '#ffa500', '#ff4757']
-    
-    fig = go.Figure(go.Bar(
-        x=classes,
-        y=values,
-        marker_color=colors,
-        text=[f'{v:.1f}%' for v in values],
-        textposition='auto'
-    ))
-    
+    colors = ["#00ff88", "#ffa500", "#ff4757"]
+
+    fig = go.Figure(
+        go.Bar(
+            x=classes,
+            y=values,
+            marker_color=colors,
+            text=[f"{v:.1f}%" for v in values],
+            textposition="auto",
+        )
+    )
+
     fig.update_layout(
-        title='Probability Distribution',
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font={'color': 'white'},
+        title="Probability Distribution",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font={"color": "white"},
         height=250,
-        yaxis={'title': 'Probability (%)', 'range': [0, 100]},
-        xaxis={'title': ''}
+        yaxis={"title": "Probability (%)", "range": [0, 100]},
+        xaxis={"title": ""},
     )
     return fig
+
 
 # ========== MAIN APP ==========
 
@@ -163,11 +176,13 @@ else:
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📋 Instructions")
-st.sidebar.markdown("""
+st.sidebar.markdown(
+    """
 1. Fill in applicant details
 2. Click **Predict Risk**
 3. View AI assessment
-""")
+"""
+)
 
 # ========== INPUT FORM ==========
 
@@ -187,7 +202,9 @@ with col2:
     income = st.number_input("Annual Income ($)", 10000, 500000, 75000, step=5000)
     credit_score = st.slider("Credit Score", 300, 850, 700)
     loan_amount = st.number_input("Loan Amount ($)", 1000, 500000, 25000, step=1000)
-    loan_purpose = st.selectbox("Loan Purpose", ["Auto", "Home", "Education", "Business", "Personal", "Debt Consolidation"])
+    loan_purpose = st.selectbox(
+        "Loan Purpose", ["Auto", "Home", "Education", "Business", "Personal", "Debt Consolidation"]
+    )
     assets_value = st.number_input("Total Assets ($)", 0, 2000000, 150000, step=10000)
 
 with col3:
@@ -224,41 +241,50 @@ if st.button("🔮 Predict Risk", use_container_width=True):
                 "assets_value": float(assets_value),
                 "number_of_dependents": int(dependents),
                 "previous_defaults": float(previous_defaults),
-                "marital_status_change": int(marital_change)
+                "marital_status_change": int(marital_change),
             }
-            
+
             result = predict_risk(data)
-            
+
             if "error" in result:
                 st.error(f"Prediction failed: {result['error']}")
             else:
                 # Display Results
                 st.markdown("---")
                 st.markdown("## 📊 Risk Assessment Results")
-                
+
                 col_result1, col_result2 = st.columns(2)
-                
+
                 with col_result1:
-                    risk_class = result['risk_class']
-                    confidence = result['confidence']
-                    
+                    risk_class = result["risk_class"]
+                    confidence = result["confidence"]
+
                     # Gauge Chart
                     fig_gauge = create_gauge_chart(confidence, risk_class)
                     st.plotly_chart(fig_gauge, use_container_width=True)
-                
+
                 with col_result2:
                     # Probability Distribution
-                    fig_prob = create_probability_chart(result['risk_probabilities'])
+                    fig_prob = create_probability_chart(result["risk_probabilities"])
                     st.plotly_chart(fig_prob, use_container_width=True)
-                
+
                 # Recommendation
                 st.markdown("---")
                 recommendations = {
-                    "Low": ("✅ **Low Risk** - Applicant shows strong financial health. Recommended for approval.", "success"),
-                    "Medium": ("⚠️ **Medium Risk** - Additional verification recommended. Consider adjusted terms.", "warning"),
-                    "High": ("🚨 **High Risk** - Significant risk factors present. Requires thorough review.", "error")
+                    "Low": (
+                        "✅ **Low Risk** - Applicant shows strong financial health. Recommended for approval.",
+                        "success",
+                    ),
+                    "Medium": (
+                        "⚠️ **Medium Risk** - Additional verification recommended. Consider adjusted terms.",
+                        "warning",
+                    ),
+                    "High": (
+                        "🚨 **High Risk** - Significant risk factors present. Requires thorough review.",
+                        "error",
+                    ),
                 }
-                
+
                 rec_text, rec_type = recommendations.get(risk_class, ("Unknown", "info"))
                 getattr(st, rec_type)(rec_text)
 
@@ -266,5 +292,5 @@ if st.button("🔮 Predict Risk", use_container_width=True):
 st.markdown("---")
 st.markdown(
     "<p style='text-align: center; color: #666;'>Built with Streamlit • XGBoost • FastAPI</p>",
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
