@@ -23,12 +23,18 @@ def run_etl():
     print("Starting ETL Process...")
     print("=" * 50)
 
-    # 1. Read Data
-    data_path = os.path.join(os.getcwd(), "data", "financial_risk_assessment.csv")
-    if not os.path.exists(data_path):
-        print(f"Error: Data file not found at {data_path}")
+    # 1. Read Data - find any CSV in data directory
+    import glob
+
+    data_dir = os.path.join(os.getcwd(), "data")
+    csv_files = glob.glob(os.path.join(data_dir, "*.csv"))
+
+    if not csv_files:
+        print(f"Error: No CSV files found in {data_dir}")
+        print("Run download_data.py first.")
         return
 
+    data_path = csv_files[0]  # Use first CSV found
     print(f"Reading data from {data_path}...")
     df = pd.read_csv(data_path)
     print(f"Loaded {len(df)} rows, {len(df.columns)} columns")

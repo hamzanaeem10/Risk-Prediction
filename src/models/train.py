@@ -63,11 +63,67 @@ def load_data_from_warehouse():
         JOIN dim_credit_history ch ON f.credit_history_id = ch.credit_history_id;
         """
         df = pd.read_sql(query, engine)
-        print(f"  ✓ Loaded {len(df)} rows")
+        print(f"  ✓ Loaded {len(df)} rows from database")
+
+        # If database is empty, fall back to CSV
+        if len(df) == 0:
+            print("  ⚠️ Database empty, loading from CSV...")
+            df = load_data_from_csv()
+
         return df
     except Exception as e:
-        print(f"Error: {e}")
-        raise
+        print(f"Database error: {e}")
+        print("  Falling back to CSV...")
+        return load_data_from_csv()
+
+
+def load_data_from_csv():
+    """Load data from CSV file as fallback."""
+    import glob
+
+    csv_patterns = ["data/*.csv", "data/**/*.csv"]
+    csv_files = []
+    for pattern in csv_patterns:
+        csv_files.extend(glob.glob(pattern))
+
+    if not csv_files:
+        # Try to download/create data
+        print("  No CSV found, downloading dataset...")
+        from src.data.download_data import download_data
+
+        download_data()
+        csv_files = glob.glob("data/*.csv")
+
+    if csv_files:
+        csv_path = csv_files[0]
+        print(f"  Loading from: {csv_path}")
+        df = pd.read_csv(csv_path)
+
+        # Rename columns to match expected format
+        column_mapping = {
+            "Age": "age",
+            "Gender": "gender",
+            "Education Level": "education_level",
+            "Marital Status": "marital_status",
+            "Income": "income",
+            "Employment Status": "employment_status",
+            "Years at Current Job": "years_at_current_job",
+            "Number of Dependents": "number_of_dependents",
+            "Credit Score": "credit_score",
+            "Payment History": "payment_history",
+            "Previous Defaults": "previous_defaults",
+            "Loan Amount": "loan_amount",
+            "Loan Purpose": "loan_purpose",
+            "Debt-to-Income Ratio": "debt_to_income_ratio",
+            "Assets Value": "assets_value",
+            "Marital Status Change": "marital_status_change",
+            "Risk Rating": "risk_rating",
+        }
+        df = df.rename(columns=column_mapping)
+        print(f"  ✓ Loaded {len(df)} rows from CSV")
+        return df
+    else:
+        raise FileNotFoundError("No data available. Run download_data.py first.")
 
 
 def create_domain_features(df):
