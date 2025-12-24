@@ -35,8 +35,8 @@ env/
 # Jupyter
 .ipynb_checkpoints/
 
-# Data
-data/
+# Data (root data folder only, not src/data)
+/data/
 *.csv
 *.json
 !sql/schema.sql
