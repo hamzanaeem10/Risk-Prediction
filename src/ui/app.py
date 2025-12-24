@@ -5,7 +5,6 @@ A modern, sleek UI for predicting loan risk
 import streamlit as st
 import requests
 import plotly.graph_objects as go
-import plotly.express as px
 import os
 
 # Page Configuration
@@ -74,7 +73,7 @@ def check_api_health():
     try:
         response = requests.get(f"{API_URL}/health", timeout=2)
         return response.status_code == 200
-    except:
+    except Exception:
         return False
 
 def predict_risk(data):

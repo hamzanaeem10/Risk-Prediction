@@ -12,19 +12,15 @@ import optuna
 import mlflow
 import mlflow.xgboost
 import mlflow.sklearn
-from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.metrics import accuracy_score, f1_score, classification_report
-from sklearn.ensemble import RandomForestClassifier, VotingClassifier, GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from imblearn.over_sampling import SMOTE
 from sqlalchemy import create_engine
-import shap
+import joblib
 import os
 import warnings
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import joblib
 
 warnings.filterwarnings('ignore')
 optuna.logging.set_verbosity(optuna.logging.WARNING)
@@ -104,7 +100,7 @@ def create_domain_features(df):
     df['young_borrower'] = (df['age'] < 25).astype(int)
     df['senior_borrower'] = (df['age'] > 55).astype(int)
     
-    print(f"  ✓ Created 16 domain-specific features")
+    print("  ✓ Created 16 domain-specific features")
     return df
 
 
@@ -271,7 +267,7 @@ def train_advanced():
         acc_xgb = accuracy_score(y_test, y_pred_xgb)
         f1_xgb = f1_score(y_test, y_pred_xgb, average='weighted')
         
-        print(f"\n  XGBoost Results:")
+        print("\n  XGBoost Results:")
         print(f"    Accuracy: {acc_xgb:.4f}")
         print(f"    F1 (Weighted): {f1_xgb:.4f}")
         
@@ -287,7 +283,6 @@ def train_advanced():
         )
         rf_model.fit(X_train_res, y_train_res)
         y_pred_rf = rf_model.predict(X_test)
-        acc_rf = accuracy_score(y_test, y_pred_rf)
         f1_rf = f1_score(y_test, y_pred_rf, average='weighted')
         print(f"    RandomForest F1: {f1_rf:.4f}")
         

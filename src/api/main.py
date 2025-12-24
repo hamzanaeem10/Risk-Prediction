@@ -96,11 +96,11 @@ def load_model():
         
         if os.path.exists(LABEL_ENCODER_PATH):
             label_encoder = joblib.load(LABEL_ENCODER_PATH)
-            print(f"  - Loaded label encoder")
+            print("  - Loaded label encoder")
         
         if os.path.exists(SCALER_PATH):
             scaler = joblib.load(SCALER_PATH)
-            print(f"  - Loaded scaler")
+            print("  - Loaded scaler")
         
         if os.path.exists(FEATURE_COLS_PATH):
             feature_cols = joblib.load(FEATURE_COLS_PATH)
