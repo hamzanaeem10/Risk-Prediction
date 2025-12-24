@@ -1,0 +1,102 @@
+name: Model Training Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      experiment_name:
+        description: 'MLflow experiment name'
+        required: false
+        default: 'financial_risk_prediction'
+      optuna_trials:
+        description: 'Number of Optuna trials'
+        required: false
+        default: '50'
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  train:
+    name: 🧠 Train Model
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: risk_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install kagglehub
+          
+      - name: Download dataset
+        run: python src/data/download_data.py
+        
+      - name: Initialize database schema
+        env:
+          PGPASSWORD: password
+        run: |
+          psql -h localhost -U user -d risk_db -f sql/schema.sql
+          
+      - name: Run ETL
+        env:
+          DB_HOST: localhost
+          DB_USER: user
+          DB_PASSWORD: password
+          DB_NAME: risk_db
+        run: python src/data/etl.py
+        
+      - name: Train model
+        env:
+          DB_HOST: localhost
+          DB_USER: user
+          DB_PASSWORD: password
+          DB_NAME: risk_db
+          MLFLOW_TRACKING_URI: ""  # Local tracking
+        run: python src/models/train.py
+        
+      - name: Upload model artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-artifacts
+          path: |
+            models/xgboost_model.json
+            models/rf_model.pkl
+            models/gb_model.pkl
+            models/label_encoder.pkl
+            models/scaler.pkl
+            models/feature_cols.pkl
+            models/shap_summary.png
+          retention-days: 30
+          
+      - name: Training summary
+        run: |
+          echo "## 🎉 Training Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Artifact | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|------|" >> $GITHUB_STEP_SUMMARY
+          for f in models/*; do
+            size=$(du -h "$f" | cut -f1)
+            echo "| $(basename $f) | $size |" >> $GITHUB_STEP_SUMMARY
+          done
