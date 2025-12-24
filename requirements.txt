@@ -3,10 +3,12 @@ sqlalchemy
 psycopg2-binary
 scikit-learn
 xgboost
-mlflow
+mlflow==2.19.0
 fastapi
 uvicorn
 shap
 pydantic
 imbalanced-learn
 kagglehub
+optuna
+joblib
