@@ -3,10 +3,11 @@ Financial Risk Prediction - Streamlit Frontend
 A modern, sleek UI for predicting loan risk
 """
 
-import streamlit as st
-import requests
-import plotly.graph_objects as go
 import os
+
+import plotly.graph_objects as go
+import requests
+import streamlit as st
 
 # Page Configuration
 st.set_page_config(

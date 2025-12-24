@@ -3,13 +3,14 @@ FastAPI Application for Financial Risk Prediction
 Aligned with actual dataset: Age, Income, Credit Score, ... Risk Rating
 """
 
+import os
+
+import joblib
+import numpy as np
+import pandas as pd
+import xgboost as xgb
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
-import xgboost as xgb
-import pandas as pd
-import numpy as np
-import joblib
-import os
 
 app = FastAPI(
     title="Financial Risk Prediction API",
