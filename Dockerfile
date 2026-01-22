@@ -7,8 +7,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/api /app/src/api
-# We might need src/models or valid model file access?
-# For now just copy api.
 
 ENV PYTHONPATH=/app
 
